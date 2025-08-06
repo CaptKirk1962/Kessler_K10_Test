@@ -1,10 +1,10 @@
 import streamlit as st
 from fpdf import FPDF  # fpdf2
-import smtplib
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email import encoders
+# import smtplib
+# from email.mime.base import MIMEBase
+# from email.mime.multipart import MIMEMultipart
+# from email.mime.text import MIMEText
+# from email import encoders
 import io
 import os
 
@@ -69,35 +69,35 @@ def generate_pdf(name, score, category, guidance):
     pdf.cell(0, 10, f"Distress Category: {category}", ln=True)
     pdf.multi_cell(0, 10, f"Guidance: {guidance}")
     pdf_output = io.BytesIO()
-    pdf_bytes = pdf.output(dest="S")  # no encode()
+    pdf_bytes = pdf.output(dest="S")  # no encode() for fpdf2
     pdf_output.write(pdf_bytes)
     pdf_output.seek(0)
     return pdf_output
 
 # -------------------------
-# Email Sending
+# Email Sending (commented out)
 # -------------------------
-def send_email(recipient_email, pdf_buffer, filename):
-    sender_email = "your_email@example.com"
-    sender_password = "your_password"
-    subject = "Your Kessler K10 Results"
-    body = "Attached is your Kessler K10 Psychological Distress Test result from Life Minus Work."
-
-    msg = MIMEMultipart()
-    msg["From"] = sender_email
-    msg["To"] = recipient_email
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
-
-    part = MIMEBase("application", "octet-stream")
-    part.set_payload(pdf_buffer.read())
-    encoders.encode_base64(part)
-    part.add_header("Content-Disposition", f"attachment; filename={filename}")
-    msg.attach(part)
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
+# def send_email(recipient_email, pdf_buffer, filename):
+#     sender_email = "your_email@example.com"
+#     sender_password = "your_password"
+#     subject = "Your Kessler K10 Results"
+#     body = "Attached is your Kessler K10 Psychological Distress Test result from Life Minus Work."
+#
+#     msg = MIMEMultipart()
+#     msg["From"] = sender_email
+#     msg["To"] = recipient_email
+#     msg["Subject"] = subject
+#     msg.attach(MIMEText(body, "plain"))
+#
+#     part = MIMEBase("application", "octet-stream")
+#     part.set_payload(pdf_buffer.read())
+#     encoders.encode_base64(part)
+#     part.add_header("Content-Disposition", f"attachment; filename={filename}")
+#     msg.attach(part)
+#
+#     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+#         server.login(sender_email, sender_password)
+#         server.send_message(msg)
 
 # -------------------------
 # Streamlit UI
@@ -112,14 +112,14 @@ if "page" not in st.session_state:
     st.session_state.page = 0
 if "name" not in st.session_state:
     st.session_state.name = ""
-if "email" not in st.session_state:
-    st.session_state.email = ""
+# if "email" not in st.session_state:
+#     st.session_state.email = ""
 
 def reset_test():
     st.session_state.responses = []
     st.session_state.page = 0
     st.session_state.name = ""
-    st.session_state.email = ""
+    # st.session_state.email = ""
 
 if st.session_state.page < len(questions):
     q = questions[st.session_state.page]
@@ -130,7 +130,7 @@ if st.session_state.page < len(questions):
             st.session_state.page += 1
 else:
     st.session_state.name = st.text_input("Your Name (optional)", st.session_state.name)
-    st.session_state.email = st.text_input("Your Email (optional, to receive results)")
+    # st.session_state.email = st.text_input("Your Email (optional, to receive results)")
 
     if st.button("Get Results"):
         score = sum(st.session_state.responses)
@@ -152,12 +152,12 @@ else:
             mime="application/pdf"
         )
 
-        if st.session_state.email:
-            try:
-                pdf_buffer.seek(0)
-                send_email(st.session_state.email, pdf_buffer, "Kessler_K10_Results.pdf")
-                st.info("📧 Results sent to your email!")
-            except Exception as e:
-                st.error(f"Email sending failed: {e}")
+        # if st.session_state.email:
+        #     try:
+        #         pdf_buffer.seek(0)
+        #         send_email(st.session_state.email, pdf_buffer, "Kessler_K10_Results.pdf")
+        #         st.info("📧 Results sent to your email!")
+        #     except Exception as e:
+        #         st.error(f"Email sending failed: {e}")
 
     st.button("🔄 Restart Test", on_click=reset_test)
